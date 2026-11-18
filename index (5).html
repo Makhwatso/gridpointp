@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GridPoint GIS – Environmental GIS</title>
+<meta name="description" content="Environmental knowledge combined with GIS, remote sensing and data analysis. Pretoria, South Africa.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EEF1EC; --ink: #1D2A2E; --muted: #55656A; --rule: #C9D1CB;
+    --accent: #0F5C63; --low: #DDE3DC; --high: #C98A1B; --mask: #9AA7A3;
+    --green-a: rgba(94, 150, 98, 0.20); --green-b: rgba(140, 180, 100, 0.16);
+    --card: #FFFFFF; --tint: rgba(255, 255, 255, 0.55); --ring: rgba(15, 92, 99, 0.09);
+    --shadow: 0 1px 2px rgba(20, 50, 55, 0.06), 0 10px 28px rgba(20, 50, 55, 0.09);
+    --hero-bg: linear-gradient(135deg, rgba(94, 150, 98, 0.22), rgba(255, 255, 255, 0.5) 55%, rgba(201, 138, 27, 0.12));
+    --head: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11191B; --ink: #E4EAE6; --muted: #96A5A8; --rule: #2A3A3D;
+      --accent: #5CC4C9; --low: #1F2D30; --high: #E3A83A; --mask: #4A5B5E;
+      --green-a: rgba(70, 150, 100, 0.20); --green-b: rgba(110, 160, 80, 0.12);
+      --card: #172326; --tint: rgba(255, 255, 255, 0.03); --ring: rgba(92, 196, 201, 0.08);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px rgba(0, 0, 0, 0.35);
+      --hero-bg: linear-gradient(135deg, rgba(70, 150, 100, 0.25), rgba(23, 35, 38, 0.6) 55%, rgba(227, 168, 58, 0.10));
+    }
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0; min-height: 100vh; color: var(--ink); font: 400 1.0625rem/1.65 var(--body);
+    background-color: var(--bg);
+    background-repeat: no-repeat;
+    background-image:
+      radial-gradient(ellipse 55% 20% at 0% 0%, var(--green-a), transparent 70%),
+      radial-gradient(ellipse 45% 16% at 100% 22%, var(--green-b), transparent 70%),
+      radial-gradient(ellipse 50% 16% at 0% 46%, var(--green-a), transparent 70%),
+      radial-gradient(ellipse 45% 16% at 100% 72%, var(--green-b), transparent 70%),
+      radial-gradient(ellipse 60% 18% at 8% 100%, var(--green-a), transparent 70%);
+  }
+  a { color: var(--accent); text-underline-offset: 3px; }
+  a:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  [hidden] { display: none !important; }
+  h1:focus { outline: none; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.5rem; }
+
+  header { border-bottom: 1px solid var(--rule); }
+  header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem 1.5rem; flex-wrap: wrap; padding-top: 1rem; padding-bottom: 1rem; }
+  .brand { font: 700 1.3rem var(--head); color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
+  nav { display: flex; gap: 0.25rem 1.5rem; flex-wrap: wrap; }
+  nav a { color: var(--muted); text-decoration: none; padding: 0.2rem 0; border-bottom: 2px solid transparent; }
+  nav a:hover { color: var(--ink); }
+  nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--high); }
+
+  h1, h2, h3 { font-family: var(--head); line-height: 1.1; margin: 0; }
+  h1 { font-size: clamp(2.3rem, 5vw, 3.6rem); font-weight: 700; letter-spacing: -0.02em; }
+  h2 { font-size: 1.75rem; font-weight: 700; margin-bottom: 1.5rem; }
+  h3 { font-size: 1.3rem; font-weight: 500; margin-bottom: 0.5rem; }
+  p { margin: 0 0 1rem; max-width: 62ch; }
+  .lead { color: var(--muted); font-size: 1.15rem; margin-top: 1.25rem; }
+  .btn { display: inline-block; background: var(--accent); color: var(--bg); text-decoration: none; padding: 0.7rem 1.3rem; border-radius: 6px; font-weight: 500; }
+  .btn:focus-visible { outline-color: var(--ink); }
+  .cta { display: flex; gap: 1.5rem; margin-top: 1.75rem; flex-wrap: wrap; align-items: center; }
+
+  .page-head { padding: 4rem 0 2.5rem; }
+  .block { padding: 3rem 0; border-top: 1px solid var(--rule); }
+
+  /* Home */
+  .hero { display: grid; gap: 3rem; padding: 4.5rem 0 4rem; align-items: center; }
+  @media (min-width: 900px) { .hero { grid-template-columns: 1fr 1.25fr; } }
+  .hero-map { margin: 0; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .hero-map svg, .hero-map img { display: block; width: 100%; height: auto; }
+
+  .cols { display: grid; gap: 1.5rem 2.5rem; }
+  @media (min-width: 760px) { .cols.two { grid-template-columns: repeat(2, 1fr); } .cols.three { grid-template-columns: repeat(3, 1fr); } }
+  .cols > div { border-top: 1px solid var(--rule); padding-top: 1rem; }
+  .cols p { color: var(--muted); margin: 0; }
+
+  /* Services */
+  .service { display: grid; gap: 0.5rem 3rem; padding: 1.75rem 0; border-top: 1px solid var(--rule); }
+  .service:first-of-type { border-top: 0; padding-top: 0; }
+  @media (min-width: 760px) { .service { grid-template-columns: 1.2fr 1fr; } }
+  .service p { color: var(--muted); }
+  .service ul { margin: 0; padding: 0; list-style: none; }
+  .service li { padding: 0.45rem 0; border-bottom: 1px solid var(--rule); }
+  .service li:last-child { border-bottom: 0; }
+
+  .service-list { list-style: none; margin: 0; padding: 0; display: grid; border-bottom: 1px solid var(--rule); }
+  @media (min-width: 760px) { .service-list { grid-template-columns: repeat(2, 1fr); column-gap: 3rem; } }
+  .service-list li { padding: 1.1rem 0; border-top: 1px solid var(--rule); font: 500 1.2rem/1.35 var(--head); }
+
+  /* About */
+  .tagline { font: 500 1.5rem/1.3 var(--head); margin: 0 0 0.5rem; max-width: 30ch; }
+  .band { background: var(--accent); color: var(--bg); border-radius: 8px; padding: 2.5rem 2rem; margin: 3rem 0; }
+  .band h2 { margin-bottom: 0.5rem; }
+  .band p { margin-bottom: 1.5rem; }
+  .band .btn { background: var(--bg); color: var(--accent); }
+  .band .btn:focus-visible { outline-color: var(--bg); }
+
+  /* Projects */
+  .projects { display: grid; gap: 2.5rem 2rem; }
+  @media (min-width: 760px) { .projects { grid-template-columns: repeat(2, 1fr); } }
+  .project .frame { width: 100%; aspect-ratio: 4 / 3; border: 1px dashed var(--mask); border-radius: 6px; display: grid; place-items: center; color: var(--muted); font-size: 0.95rem; overflow: hidden; margin-bottom: 0.9rem; }
+  .project .frame img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .project .frame:has(img) { border-style: solid; border-color: var(--rule); background: var(--low); }
+  .project p { color: var(--muted); margin: 0; }
+
+  /* Contact */
+  .contact-list { display: grid; gap: 1.25rem; margin: 2rem 0 0; }
+  @media (min-width: 760px) { .contact-list { grid-template-columns: 1fr 1fr 1.4fr; } }
+  .contact-list dt { color: var(--muted); font-size: 0.95rem; }
+  .contact-list dd { margin: 0.15rem 0 0; font-size: 1.1rem; }
+  address { font-style: normal; }
+
+  footer { border-top: 1px solid var(--rule); padding: 2rem 0 3rem; color: var(--muted); font-size: 0.95rem; }
+
+  /* Phone-friendly tapping */
+  a { -webkit-tap-highlight-color: rgba(15, 92, 99, 0.15); }
+  nav a { padding: 0.55rem 0.1rem; }
+  .btn:active { opacity: 0.85; }
+  .service-list li:active { background: rgba(94, 150, 98, 0.12); }
+
+
+  /* One-page layout */
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  header { position: sticky; top: 0; z-index: 10; background: var(--bg); }
+  section.page { scroll-margin-top: 4.5rem; }
+  section.page + section.page { border-top: 1px solid var(--rule); margin-top: 2rem; }
+  h2.page-title { font-size: clamp(2.3rem, 5vw, 3.6rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0; }
+
+  /* ===== Visual refresh ===== */
+  header { box-shadow: 0 1px 0 var(--rule), 0 6px 20px rgba(20, 50, 55, 0.05); }
+  .brand { display: inline-flex; align-items: center; gap: 0.6rem; }
+  .logo { width: 2rem; height: 2rem; border-radius: 9px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), #2E8B57); }
+  .logo svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: #fff; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+  h1::after, h2.page-title::after { content: ""; display: block; width: 64px; height: 4px; border-radius: 4px; margin-top: 1.1rem; background: linear-gradient(90deg, var(--high), var(--accent)); }
+
+  .btn { border-radius: 999px; padding: 0.8rem 1.6rem; box-shadow: 0 6px 16px rgba(15, 92, 99, 0.25); }
+  .btn.ghost { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); box-shadow: none; padding: calc(0.8rem - 1.5px) calc(1.6rem - 1.5px); }
+
+  .ico { display: inline-grid; place-items: center; width: 2.9rem; height: 2.9rem; border-radius: 14px; background: var(--green-a); color: var(--accent); margin-bottom: 0.9rem; }
+  .ico.sm { width: 2.2rem; height: 2.2rem; border-radius: 11px; margin: 0 0.6rem 0 0; vertical-align: middle; }
+  .ico svg { width: 1.5rem; height: 1.5rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .ico.sm svg { width: 1.2rem; height: 1.2rem; }
+
+  /* Home hero panel */
+  .hero { position: relative; overflow: hidden; margin-top: 1.5rem; padding: 2.5rem; border-radius: 24px; border: 1px solid var(--rule); background: var(--hero-bg); box-shadow: var(--shadow); }
+  .hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-radial-gradient(circle at 100% 0%, var(--ring) 0 1.5px, transparent 1.5px 28px); }
+  .hero > * { position: relative; }
+  @media (max-width: 600px) { .hero { padding: 1.5rem; border-radius: 18px; gap: 2rem; } }
+  .hero-map { background: var(--card); border-radius: 16px; box-shadow: var(--shadow); }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; margin: 1.5rem 0 0; padding: 0; }
+  .chips li { padding: 0.3rem 0.85rem; border-radius: 999px; background: var(--card); border: 1px solid var(--rule); font-size: 0.9rem; }
+
+  /* Cards */
+  .cols > div { background: var(--card); border: 1px solid var(--rule); border-radius: 18px; padding: 1.5rem; box-shadow: var(--shadow); transition: transform 0.2s ease; }
+  .cols.three > div:nth-child(1) { border-top: 4px solid #4C9A5B; }
+  .cols.three > div:nth-child(2) { border-top: 4px solid var(--high); }
+  .cols.three > div:nth-child(3) { border-top: 4px solid var(--accent); }
+  @media (hover: hover) { .cols > div:hover, .project:hover, .contact-list > div:hover { transform: translateY(-3px); } }
+  @media (prefers-reduced-motion: reduce) { .cols > div, .project, .contact-list > div { transition: none; transform: none !important; } }
+
+  /* Alternating section bands */
+  section.page { padding-bottom: 2rem; }
+  section.page + section.page { margin-top: 0; border-top: 0; }
+  section.page:nth-of-type(even) { background: var(--tint); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+
+  /* Services */
+  .service-list { gap: 1rem 1.25rem; border-bottom: 0; }
+  .service-list li { display: flex; align-items: center; gap: 1rem; background: var(--card); border: 1px solid var(--rule); border-radius: 16px; padding: 1.1rem 1.25rem; box-shadow: var(--shadow); font-size: 1.1rem; }
+  .service-list li::before { content: ""; flex: none; width: 2.5rem; height: 2.5rem; border-radius: 12px; background: radial-gradient(circle, var(--accent) 0 22%, transparent 25%), var(--green-a); }
+
+  /* Band */
+  .band { background: repeating-radial-gradient(circle at 90% 15%, rgba(255, 255, 255, 0.09) 0 1.5px, transparent 1.5px 24px), linear-gradient(135deg, var(--accent), #0B3F45); border-radius: 22px; padding: 3rem 2rem; box-shadow: var(--shadow); }
+  .band h2 { color: #fff; }
+  .band p { color: rgba(255, 255, 255, 0.9); }
+  .band .btn { background: #fff; color: #0B3F45; box-shadow: none; }
+
+  /* Projects */
+  .project { background: var(--card); border: 1px solid var(--rule); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); transition: transform 0.2s ease; }
+  .project .frame { border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; margin-bottom: 1.1rem; background: var(--low); }
+  .project .frame:has(img) { border: 0; border-bottom: 1px solid var(--rule); }
+  .project .frame a { display: block; width: 100%; height: 100%; }
+  .project h3 { padding: 0 1.4rem; }
+  .project p { padding: 0 1.4rem 1.4rem; }
+
+  /* Contact */
+  .contact-list > div { background: var(--card); border: 1px solid var(--rule); border-radius: 18px; padding: 1.4rem; box-shadow: var(--shadow); transition: transform 0.2s ease; }
+  .contact-list dt { display: flex; align-items: center; font-weight: 500; color: var(--ink); margin-bottom: 0.6rem; }
+  .contact-list dd a { overflow-wrap: anywhere; }
+  .contact-list dd .maps { display: inline-block; margin-top: 0.6rem; font-size: 0.95rem; }
+
+  footer { background: var(--tint); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19C5 10 10 5 20 5c0 10-5 15-14 15"/><path d="M5 19 13 11"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+  <symbol id="i-sprout" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12C12 8 9 6 5 6c0 4 3 6 7 6Z"/><path d="M12 14c0-3 2-5 6-5 0 3-2 5-6 5Z"/></symbol>
+  <symbol id="i-mountain" viewBox="0 0 24 24"><path d="m3 19 6-10 4 6 2-3 6 7Z"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></symbol>
+</svg>
+
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#home"><span class="logo"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pin"/></svg></span>GridPoint GIS</a>
+    <nav aria-label="Main">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="page" id="home">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>Every Environmental Decision Is A Spatial Decision.</h1>
+        <p class="lead">Gridpoint GIS (GPG) provides GIS, remote sensing and environmental mapping solutions, delivering accurate spatial data and high-quality maps to environmental, surveying, agricultural, mining and engineering professionals.</p>
+        <div class="cta">
+          <a class="btn" href="#contact">Start a conversation</a>
+          <a class="btn ghost" href="#projects">See our projects</a>
+        </div>
+        <ul class="chips"><li>GIS</li><li>Remote sensing</li><li>Environmental science</li></ul>
+      </div>
+
+      <figure class="hero-map">
+        <svg viewBox="0 0 600 440" role="img" aria-label="Stylised terrain map with contour lines, a river and a suitable area highlighted">
+          <rect width="600" height="440" fill="var(--low)"/>
+          <g fill="none" stroke="var(--mask)" stroke-width="1.5">
+            <path d="M370 60C470 55 540 120 535 200C530 290 450 350 360 345C270 340 215 280 225 195C235 110 290 65 370 60Z"/>
+            <path d="M370 95C445 92 495 140 492 202C488 268 430 312 362 308C295 304 255 262 262 200C270 138 310 98 370 95Z"/>
+            <path d="M368 130C418 128 452 160 450 205C447 250 410 278 365 275C322 272 296 242 300 203C304 165 330 132 368 130Z"/>
+            <path d="M20 270C70 250 130 262 160 300C185 335 170 390 120 410C80 425 30 410 0 390L0 290Z"/>
+            <path d="M20 305C60 290 105 298 125 325C142 350 132 380 100 392C70 402 35 392 0 378L0 320Z"/>
+          </g>
+          <path d="M366 165C393 164 410 182 408 206C406 230 388 245 365 244C343 243 332 226 334 205C336 184 346 166 366 165Z" fill="var(--high)" fill-opacity="0.55" stroke="var(--high)" stroke-width="1.5"/>
+          <path d="M0 70C120 60 190 110 200 190C210 270 190 330 250 380C300 420 420 400 600 430" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M0 330L600 90" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="7 6"/>
+          <g transform="translate(556 44)" fill="var(--ink)" font-family="Instrument Sans, system-ui, sans-serif" font-size="15" text-anchor="middle">
+            <path d="M0 -14L8 10L0 5L-8 10Z"/>
+            <text y="30">N</text>
+          </g>
+        </svg>
+      </figure>
+    </div>
+
+    <div class="block">
+      <h2>What we offer</h2>
+      <div class="cols two">
+        <div>
+          <h3>EIA Support</h3>
+          <p>Sensitivity maps, cumulative impact assessments, and infrastructure/buffermapping etc.</p>
+        </div>
+        <div>
+          <h3>Cadastral Mapping</h3>
+          <p>Land and farm boundary mapping, including maps for regulatorysubmissions (e.g., mining and prospecting rights) etc.</p>
+        </div>
+        <div>
+          <h3>Hydrological & Groundwater Mapping</h3>
+          <p>Catchment delineation, depth-to-groundwater visuals, and elevation/flow-direction profiles etc.</p>
+        </div>
+        <div>
+          <h3>Agricultural Modelling</h3>
+          <p>Land capability and suitability modelling using weighted overlayanalysis etc.</p>
+        </div>
+		<div>
+          <h3>Land Use & Biodiversity</h3>
+          <p>Detailed land-cover assessment and biodiversity mapping etc.</p>
+		</div>
+		<div>
+          <h3>Land Use & Biodiversity</h3>
+          <p>Detailed land-cover assessment and biodiversity mapping etc.</p>
+        </div>
+		<div>
+          <h3>Reference Mapping</h3>
+          <p>Municipal, locality, and general reference maps etc.</p>
+        </div>
+		<div>
+          <h3>Custom Research Mapping</h3>
+          <p>Tailored mapping for academic, consulting, and planning projects.</p>
+        </div>
+      </div>
+      <p style="margin-top:1.5rem"><a href="#services">Read about our services</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="about">
+<div class="wrap">
+    <div class="page-head">
+      <h2 class="page-title">GridPoint GIS.</h2>
+      <p class="lead">GridPoint GIS is a dedicated spatial analysis program that empowers environmental, geological, and hydrological professionals with advanced geospatial solutions. By combining Geographic Information Systems (GIS), remote sensing, satellite imagery, and spatial data analytics, we help organizations make informed decisions based on accurate, location-based intelligence.</p>
+      <p>Whether managing natural resources, assessing environmental risks, or investigating geological and water-related challenges, GridPoint GIS delivers practical, data-driven solutions that support sustainable development and effective planning.</p>
+    </div>
+
+    <div class="block">
+      <h2>Our focus areas</h2>
+      <p class="tagline">Only at GridPoint GIS.</p>
+      <div class="cols three" style="margin-top:2rem">
+        <div>
+          <h3>Environmental Management</h3>
+          <p>Environmental impact assessments, land-use mapping, biodiversity monitoring, climate risk analysis and conservation planning.</p>
+        </div>
+        <div>
+          <h3>Geology</h3>
+          <p>Geological mapping, resource exploration, hazard identification and spatial data integration.</p>
+        </div>
+        <div>
+          <h3>Hydrology</h3>
+          <p>Watershed analysis, water resource mapping, flood risk assessment and water quality monitoring.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="band">
+      <h2>Build something meaningful.</h2>
+      <p>Let's solve environmental challenges together.</p>
+      <a class="btn" href="#contact">Contact us</a>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="services">
+  <div class="wrap">
+    <div class="page-head">
+      <h2 class="page-title">Our Services</h2>
+    </div>
+
+    <ul class="service-list">
+      <li>Geographic Information Systems (GIS) analysis</li>
+      <li>Remote sensing and satellite image interpretation</li>
+      <li>Spatial database development and management</li>
+      <li>Cartographic map production</li>
+      <li>Drone and aerial data integration</li>
+      <li>Spatial modelling and predictive analysis</li>
+      <li>Environmental and natural resource mapping</li>
+      <li>Custom geospatial solutions for research, government, and industry</li>
+    </ul>
+    <div style="height:3rem"></div>
+  </div>
+</section>
+
+<section class="page" id="projects">
+  <div class="wrap">
+    <div class="page-head">
+      <h2 class="page-title">Projects</h2>
+      <p class="lead">A selection of maps and spatial analyses from our work.</p>
+    </div>
+
+<div class="projects">
+  <article class="project">
+    <div class="frame"><img src="maps/map1.png" alt="Map 1: describe what this map shows"></div>
+    <h3>Regulation 2.2 Map</h3>
+    <p>A Regulation 2(2) map is a mandatory requirement for mining and prospecting right applications under the 
+	MPRDA Regulations.</p>
+  </article>
+  <article class="project">
+    <div class="frame"><img src="maps/map2.png" alt="Map 2: describe what this map shows"></div>
+    <h3>Landuse and Landcover Map</h3>
+    <p>This map illustrates the landscape character of Kloof, highlighting areas of biodiversity 
+	significance (CA Irreplaceable), existing land cover, and the transportation network.</p>
+  </article>
+  <article class="project">
+    <div class="frame"><img src="maps/map3.png" alt="Map 3: describe what this map shows"></div>
+    <h3>Hydrological Map</h3>
+    <p>Acid Mine Drainage Sources and Hydrological Pathways Affecting the Cradle of Humankind.</p>
+  </article>
+  <article class="project">
+    <div class="frame"><img src="maps/map4.jpg" alt="Map 4: describe what this map shows"></div>
+    <h3>Land Capability Map</h3>
+    <p>Maize Suitability Mapping for Agricultural Planning.</p 
+</div>
+  </div>
+</section>
+
+<section class="page" id="contact">
+  <div class="wrap">
+    <div class="page-head">
+      <h2 class="page-title">Start a conversation.</h2>
+      <p class="lead">Tell us about your project, site or dataset and we will get back to you.</p>
+      <p style="margin-top:1.5rem"><a class="btn" href="mailto:gridpoint.gis@gmail.com">Email us</a></p>
+    </div>
+
+    <dl class="contact-list">
+      <div>
+        <dt>Email</dt>
+        <dd><a href="mailto:info@nevalco.za">gridpoint.gis@gmail.com</a></dd>
+      </div>
+      <div>
+  <dt>Phone</dt>
+  <dd>
+    <a href="tel:+2783 424 9846">+2783 424 9846</a><br>
+    <a href="tel:+2763 540 6842">+2763 540 6842</a>
+  </dd>
+</div>
+      <div>
+        <dt>Location</dt>
+        <dd><address>Derdepoort Rd, Silverton<br>Pretoria, 0184<br>South Africa</address></dd>
+      </div>
+    </dl>
+    <div style="height:3rem"></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">&copy; 2026 GridPoint GIS. All rights reserved.</div>
+</footer>
+
+<script>
+
+(function () {
+  if (!('IntersectionObserver' in window)) return;
+  var links = document.querySelectorAll('nav a');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      links.forEach(function (a) {
+        if (a.getAttribute('href') === '#' + e.target.id) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      });
+    });
+  }, { rootMargin: '-35% 0px -60% 0px' });
+  document.querySelectorAll('section.page').forEach(function (s) { io.observe(s); });
+})();
+</script>
+</body>
+</html>
